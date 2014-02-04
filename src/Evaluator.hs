@@ -97,7 +97,7 @@ pushglobal name state =
    let
       a = aLookup (gmGlobals state) name (error ("Undeclared global " ++ name))
    in
-      state {gmStack = (a : gmStack state)}
+      state {gmStack = a : gmStack state}
 
 
 pushint :: Int -> GmState -> GmState
@@ -105,7 +105,7 @@ pushint n state =
    let
       (heap', a) = hAlloc (gmHeap state) (NNum n)
    in
-      state {gmHeap = heap', gmStack = (a : gmStack state)}
+      state {gmHeap = heap', gmStack = a : gmStack state}
     
       
 mkap :: GmState -> GmState
@@ -114,7 +114,7 @@ mkap state =
       (a1:a2:as) = gmStack state
       (heap', a) = hAlloc (gmHeap state) (NAp a1 a2)
    in
-      state {gmHeap = heap', gmStack = (a : as)}
+      state {gmHeap = heap', gmStack = a:as}
       
   
 push :: Int -> GmState -> GmState
@@ -127,7 +127,7 @@ push n state =
 
       
 getArg :: Node -> Addr
-getArg (NAp a1 a2) = a2
+getArg (NAp _ a2) = a2
 
 
 slide :: Int -> GmState -> GmState
@@ -135,7 +135,7 @@ slide n state =
    let
       (a:as) = gmStack state
    in
-      state { gmStack = (a : drop n as) }
+      state { gmStack = a : drop n as }
       
       
 unwind :: GmState -> GmState
@@ -145,7 +145,7 @@ unwind state =
        heap = gmHeap state
        newState (NNum _) = state
        newState (NAp a1 _) = state { gmCode = [Unwind], gmStack = a1:a:as }
-       mewState (NGlobal n c)
+       newState (NGlobal n c)
          | length as < n = error "Unwinding with too few arguments"
          | otherwise = state { gmCode = c }
    in
