@@ -5,6 +5,7 @@ module Evaluator(runProg) where
 
 
 import Utils(Addr, Heap, ASSOC, hAlloc, aLookup, hLookup)
+import Language
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +57,6 @@ type GmGlobals = ASSOC Name Addr
 
 
 type GmStats = ()
-type Name = String
   
 runProg :: String -> String
 runProg = showResults . eval . compile . parse
@@ -152,11 +152,67 @@ unwind state =
       newState $ hLookup heap a
 
 
+compile :: CoreProgram -> GmState
+compile program =
+   let
+      (heap, globals) = buildInitialHeap program
+   in
+      GmState initialCode [] heap globals ()  
+
+
+buildInitialHeap :: CoreProgram -> (GmHeap, GmGlobals)
+buildInitialHeap program = 
+   let
+      compiled = map compileSc program
+   in
+      mapAccuml allocateSc hInitial compiled
+
+
+type GmCompiledSC = (Name, Int, GmCode)
+
+allocateSc :: GmHeap -> GmCompiledSC -> (GmHeap, (Name, Addr))
+allocateSc heap (name, nargs, code) =
+   let
+      (heap', addr) = hAlloc heap $ NGlobal nargs code
+   in
+      (heap', (name, addr))
+
+
+initialCode :: GmCode
+initialCode = [Pushglobal "main", Unwind]
+
+
+compileSc :: (Name, [Name], CoreExpr) -> GmCompiledSC
+compileSc (name, env, body) = (name, length env, compileR body (zip env [0..]))
+
+
+type GmEnvironment = ASSOC Name Int
+
+compileR :: CoreExpr -> GmEnvironment -> GmCode
+compileR expr env = compileC expr env ++ [Slide (length env + 1), Unwind]
+
+
+compileC :: CoreExpr -> GmEnvironment -> GmCode
+compileC (EVar v) env
+   | elem v (aDomain env) = [Push n]
+   | otherwise            = [Pushglobal v]
+   where
+      n = aLookup env v (error "Can't happen")
+      
+compileC (ENum num) _ = [Pushint num]
+
+compileC (EAp e1 e2) env = compileC e2 env ++ compileC e1 (argOffset 1 env) ++ [Mkap]
+
+
+argOffset :: Int -> GmEnvironment -> GmEnvironment  
+argOffset n env = [(v, n + m) | (v,m) <- env]
+
+
+
+      
+
 --TODO parse 
 parse = undefined
-
---TODO compile
-compile = undefined
 
 --TODO showResults
 showResults = undefined
