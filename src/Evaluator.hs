@@ -7,6 +7,8 @@ module Evaluator(runProg) where
 import Utils
 import Language
 
+import Data.List(mapAccumL)
+
 ------------------------------------------------------------------------------------------------------------------------
 
 data GmState = GmState
@@ -165,7 +167,7 @@ buildInitialHeap program =
    let
       compiled = map compileSc program
    in
-      mapAccuml allocateSc hInitial compiled
+      mapAccumL allocateSc hInitial compiled
 
 
 type GmCompiledSC = (Name, Int, GmCode)
