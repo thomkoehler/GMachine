@@ -7,10 +7,14 @@ author:         Koehler
 executable GMachine
   hs-source-dirs:  src
   main-is:         Main.hs
-  build-depends:   base >= 4, 
-                   containers
+  build-depends:   
+                   base >= 4,
+                   containers,
+                   array
   ghc-options:     -Wall -rtsopts -O2
+  build-tools:     alex, happy
   other-modules:   
                    Evaluator,
+                   Language,
                    Utils
 

@@ -4,7 +4,7 @@
 module Evaluator(runProg) where
 
 
-import Utils(Addr, Heap, ASSOC, hAlloc, aLookup, hLookup)
+import Utils
 import Language
 
 ------------------------------------------------------------------------------------------------------------------------
