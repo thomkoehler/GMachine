@@ -185,13 +185,13 @@ initialCode = [Pushglobal "main", Unwind]
 
 
 compileSc :: (Name, [Name], CoreExpr) -> GmCompiledSC
-compileSc (name, env, body) = (name, length env, compileR body (zip env [0..]))
+compileSc (name, env, body) = (name, length env, compileR body (aFromList (zip env [0..])))
 
 
 type GmEnvironment = ASSOC Name Int
 
 compileR :: CoreExpr -> GmEnvironment -> GmCode
-compileR expr env = compileC expr env ++ [Slide (length env + 1), Unwind]
+compileR expr env = compileC expr env ++ [Slide (aLenght env + 1), Unwind]
 
 
 compileC :: CoreExpr -> GmEnvironment -> GmCode
@@ -207,9 +207,7 @@ compileC (EAp e1 e2) env = compileC e2 env ++ compileC e1 (argOffset 1 env) ++ [
 
 
 argOffset :: Int -> GmEnvironment -> GmEnvironment  
-argOffset n env = [(v, n + m) | (v,m) <- env]
-
-
+argOffset n = aMap (+n)
 
       
 
@@ -218,7 +216,6 @@ parse = undefined
 
 --TODO showResults
 showResults = undefined
-
 
 
 ------------------------------------------------------------------------------------------------------------------------

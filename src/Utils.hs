@@ -71,3 +71,14 @@ aEmpty = Map.empty
 aInsert :: Ord k => k -> x -> ASSOC k x -> ASSOC k x  
 aInsert = Map.insert
 
+aMap :: (a -> b) -> ASSOC k a -> ASSOC k b
+aMap = Map.map
+
+aLenght :: ASSOC k a -> Int
+aLenght = length . Map.toList
+
+aFromList :: Ord k => [(k, x)] -> ASSOC k x
+aFromList = Map.fromList
+
+
+------------------------------------------------------------------------------------------------------------------------
